@@ -12,8 +12,6 @@ Para manter a organização do projeto, a pasta `/lib` deve ser usada para:
 
 ## 🛠️ Organização Sugerida
 
-
-
 - `formatters.js` — Manipulação de strings e datas para exibição na agenda.
 - `validators.js` — Validação de formulários de contato e compromissos.
 - `storage.js` — Lógica para persistência de dados (LocalStorage ou Banco de Dados).
