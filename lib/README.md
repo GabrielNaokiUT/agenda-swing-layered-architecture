@@ -4,6 +4,7 @@ Este diretório contém os módulos principais, utilitários e lógicas de apoio
 
 ## 📂 O que colocar aqui?
 
+Exemplos:
 Para manter a organização do projeto, a pasta `/lib` deve ser usada para:
 * **Utils/Helpers:** Funções genéricas (ex: formatadores de data, validadores de CPF/E-mail).
 * **Services:** Lógica de comunicação com APIs ou serviços externos.
@@ -12,6 +13,8 @@ Para manter a organização do projeto, a pasta `/lib` deve ser usada para:
 
 ## 🛠️ Organização Sugerida
 
+Utilize essa secção para strings, datas, validações de formulários, etc.
+Exemplos:
 - `formatters.js` — Manipulação de strings e datas para exibição na agenda.
 - `validators.js` — Validação de formulários de contato e compromissos.
 - `storage.js` — Lógica para persistência de dados (LocalStorage ou Banco de Dados).
