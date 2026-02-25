@@ -1,22 +1,19 @@
 package com.br.senai.ads3.agenda_fatesg.pages;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-
+import com.br.senai.ads3.agenda_fatesg.controllers.ContatoController;
+import com.br.senai.ads3.agenda_fatesg.controllers.FormController;
+import com.br.senai.ads3.agenda_fatesg.controllers.ListController;
 import com.br.senai.ads3.agenda_fatesg.domains.Contato;
 import com.br.senai.ads3.agenda_fatesg.enums.TipoTela;
 import java.awt.EventQueue;
 import javax.swing.table.DefaultTableModel;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
+import javax.swing.JOptionPane;
+import java.nio.file.Path;
+import java.util.List;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /**
  *
@@ -24,12 +21,19 @@ import javax.swing.table.TableRowSorter;
  */
 public class Form_Listagem extends javax.swing.JFrame {
 
+    private final ListController contatoController;
+
     /**
      * Creates new form Form_Listagem
      */
-    public Form_Listagem() {
+    public Form_Listagem(ListController controller) {
+        this.contatoController = controller;
         initComponents();
-        carregarDados();
+        carregarDadosAsync();
+    }
+
+    public Form_Listagem() {
+        this(new ContatoController(Path.of("agenda.txt")));
     }
 
     /**
@@ -50,6 +54,7 @@ public class Form_Listagem extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         grid = new javax.swing.JTable();
         btnFechar = new javax.swing.JButton();
+        btnExcluir = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -157,6 +162,16 @@ public class Form_Listagem extends javax.swing.JFrame {
             }
         });
 
+        btnExcluir.setBackground(new java.awt.Color(255, 102, 102));
+        btnExcluir.setFont(new java.awt.Font("Calibri", 1, 18)); // NOI18N
+        btnExcluir.setForeground(new java.awt.Color(0, 0, 102));
+        btnExcluir.setText("Excluir");
+        btnExcluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcluirActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -177,7 +192,9 @@ public class Form_Listagem extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(btnFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(311, 311, 311))
+                .addGap(141, 141, 141)
+                .addComponent(btnExcluir, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(46, 46, 46))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -189,7 +206,9 @@ public class Form_Listagem extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnFechar)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnFechar)
+                    .addComponent(btnExcluir))
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
@@ -197,33 +216,36 @@ public class Form_Listagem extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void gridMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gridMouseClicked
-        // TODO add your handling code here:
-        if (evt.getClickCount() == 2) { // Verifica se foi duplo clique
+        if (evt.getClickCount() == 2) { // duplo clique
             int linhaVisual = grid.getSelectedRow();
             int linha = grid.convertRowIndexToModel(linhaVisual);
 
             if (linha != -1) {
-                // Pega os dados da linha selecionada
                 String nome = (String) grid.getModel().getValueAt(linha, 0);
-                if(nome == null) nome = "";                
+                if (nome == null) {
+                    nome = "";
+                }
                 String email = (String) grid.getModel().getValueAt(linha, 1);
-                if(email == null) email = "";
+                if (email == null) {
+                    email = "";
+                }
                 String telefone = (String) grid.getModel().getValueAt(linha, 2);
-                if(telefone == null) telefone = "";
+                if (telefone == null) {
+                    telefone = "";
+                }
 
-                // Abre a tela de cadastro passando os dados
-                Form_Cadastro cadastro = new Form_Cadastro(TipoTela.EDIT, new Contato(nome, email, telefone));
+                // Abre tela de cadastro em modo EDIT passando o controller
+                Form_Cadastro cadastro = new Form_Cadastro(TipoTela.EDIT, new Contato(nome, email, telefone), (com.br.senai.ads3.agenda_fatesg.controllers.FormController) contatoController);
                 cadastro.setVisible(true);
-                this.dispose(); 
+                this.dispose();
             }
         }
     }//GEN-LAST:event_gridMouseClicked
 
     private void btnAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarActionPerformed
-        // TODO add your handling code here:
-        Form_Cadastro cadastro = new Form_Cadastro();
+        Form_Cadastro cadastro = new Form_Cadastro((FormController) contatoController);
         cadastro.setVisible(true);
-        this.dispose(); 
+        this.dispose();
     }//GEN-LAST:event_btnAdicionarActionPerformed
 
     private void btnFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFecharActionPerformed
@@ -232,15 +254,57 @@ public class Form_Listagem extends javax.swing.JFrame {
     }//GEN-LAST:event_btnFecharActionPerformed
 
     private void edtFiltroNomeKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_edtFiltroNomeKeyReleased
-        // TODO add your handling code here:
         DefaultTableModel modelo = (DefaultTableModel) grid.getModel();
         TableRowSorter<DefaultTableModel> filtro = new TableRowSorter<>(modelo);
         grid.setRowSorter(filtro);
-
-        // 2. Aplica o filtro baseado no que foi digitado (ignorando maiúsculas/minúsculas)
-        // O parâmetro 0 indica que o filtro será aplicado na primeira coluna (Nome)
         filtro.setRowFilter(RowFilter.regexFilter("(?i)" + edtFiltroNome.getText(), 0));
     }//GEN-LAST:event_edtFiltroNomeKeyReleased
+
+    private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
+        int linhaVisual = grid.getSelectedRow();
+        if (linhaVisual == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um contato para excluir.");
+            return;
+        }
+        int linha = grid.convertRowIndexToModel(linhaVisual);
+        String nome = (String) grid.getModel().getValueAt(linha, 0);
+        if (nome == null || nome.isBlank()) {
+            JOptionPane.showMessageDialog(this, "Nome inválido.");
+            return;
+        }
+        int resp = JOptionPane.showConfirmDialog(this, "Confirma exclusão lógica do contato '" + nome + "'?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (resp != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Boolean doInBackground() {
+                try {
+                    return contatoController.markInactiveByName(nome);
+                } catch (Exception ex) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao excluir: " + ex.getMessage()));
+                    return false;
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Boolean ok = get();
+                    if (ok) {
+                        JOptionPane.showMessageDialog(Form_Listagem.this, "Contato marcado como inativo.");
+                        carregarDadosAsync(); // recarrega tabela
+                    } else {
+                        JOptionPane.showMessageDialog(Form_Listagem.this, "Contato não encontrado ou já inativo.");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao processar exclusão: " + ex.getMessage());
+                }
+            }
+        };
+        worker.execute();
+    }//GEN-LAST:event_btnExcluirActionPerformed
 
     /**
      * @param args the command line arguments
@@ -279,6 +343,7 @@ public class Form_Listagem extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdicionar;
+    private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnFechar;
     private javax.swing.JTextField edtFiltroNome;
     private javax.swing.JTable grid;
@@ -289,28 +354,31 @@ public class Form_Listagem extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 
-    private void carregarDados() {
-        String caminho = "agenda.txt";
+    private void carregarDadosAsync() {
+        SwingWorker<List<Contato>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<Contato> doInBackground() {
+                return contatoController.listAll();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Contato> list = get();
+                    populateTable(list);
+                } catch (Exception ex) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao carregar dados: " + ex.getMessage()));
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void populateTable(List<Contato> contatos) {
         DefaultTableModel modelo = (DefaultTableModel) grid.getModel();
-        modelo.setNumRows(0); // Limpa a tabela antes de carregar
-
-        try {
-            File arquivo = new File(caminho);
-            if (!arquivo.exists()) {
-                arquivo.createNewFile(); // Cria se não existir
-                return;
-            }
-
-            BufferedReader leitor = new BufferedReader(new FileReader(arquivo));
-            String linha;
-            while ((linha = leitor.readLine()) != null) {
-                String[] dados = linha.split(";");
-                if(dados[3].equalsIgnoreCase("ativo"))
-                    modelo.addRow(Arrays.copyOfRange(dados, 0, 3));
-            }
-            leitor.close();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao ler arquivo.");
+        modelo.setNumRows(0);
+        for (Contato c : contatos) {
+            modelo.addRow(new Object[]{c.getNome(), c.getEmail(), c.getTelefone()});
         }
     }
 }

@@ -1,19 +1,23 @@
 package com.br.senai.ads3.agenda_fatesg.pages;
 
-
+import com.br.senai.ads3.agenda_fatesg.controllers.ContatoController;
+import com.br.senai.ads3.agenda_fatesg.controllers.FormController;
 import com.br.senai.ads3.agenda_fatesg.domains.Contato;
 import com.br.senai.ads3.agenda_fatesg.enums.TipoTela;
+import com.br.senai.ads3.agenda_fatesg.exceptions.BusinessException;
+import com.br.senai.ads3.agenda_fatesg.exceptions.ValidationException;
 import java.awt.Color;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-
 /**
  *
  * @author CLAYTON.MARQUES
@@ -22,26 +26,32 @@ public class Form_Cadastro extends javax.swing.JFrame {
 
     /**
      * Creates new form Form_Main
+     *
      * @param tipoela
      */
-    
     final private TipoTela tipoTela;
     private Contato contato;
-    
-    public Form_Cadastro(final TipoTela tipoTela, final Contato contato ) {
+    private final FormController contatoController;
+
+    public Form_Cadastro(final TipoTela tipoTela, final Contato contato, final FormController controller) {
         this.tipoTela = tipoTela;
-        if(contato == null){
-            this.contato = new Contato("","","");
+        if (contato == null) {
+            this.contato = new Contato("", "", "");
         } else {
             this.contato = contato;
-        }       
+        }
+        this.contatoController = controller;
         initComponents();
         ajustaTela();
         carregaTela();
     }
 
+    public Form_Cadastro(FormController controller) {
+        this(TipoTela.INSERT, null, controller);
+    }
+
     public Form_Cadastro() {
-        this(TipoTela.INSERT, null);
+        this(new ContatoController("agenda.txt"));
     }
 
     /**
@@ -200,65 +210,42 @@ public class Form_Cadastro extends javax.swing.JFrame {
     }//GEN-LAST:event_edtNomeActionPerformed
 
     private void btnGravarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGravarActionPerformed
-        // TODO add your handling code here:
         String nomeNovo = edtNome.getText().trim();
         String email = edtEmail.getText().trim();
         String telefone = edtTelefone.getText().trim();
-        String status = "ativo";
         boolean isEdit = this.tipoTela == TipoTela.EDIT;
-        java.io.File arquivo = new java.io.File("agenda.txt");
+        Contato dto = new Contato(nomeNovo, email, telefone);
+        String originalName = this.contato != null ? this.contato.getNome() : "";
 
-        try {
-            // --- INÍCIO DA VALIDAÇÃO DE DUPLICIDADE ---
-            // Se for Inserção: não pode coincidir com ninguém
-            // Se for Edição: só valida se o usuário mudou o nome e o novo já existe
-            if (this.tipoTela == TipoTela.INSERT || !nomeNovo.equalsIgnoreCase(this.contato.getNome())) {
-                if (arquivo.exists()) {
-                    List<String> todasLinhas = Files.readAllLines(arquivo.toPath());
-                    for (String linha : todasLinhas) {
-                        String[] registro = linha.split(";");
-                        String nomeSalvo = registro[0];
-                        if (nomeSalvo.equalsIgnoreCase(nomeNovo)) {
-                            if(registro[3].equalsIgnoreCase("ativo")) {
-                                JOptionPane.showMessageDialog(this, "Erro: O nome '" + nomeNovo + "' já está cadastrado!");
-                                return; // Para a execução aqui
-                            } else {
-                                if(JOptionPane.showConfirmDialog(this, "Este contato está inativo. Deseja ativá-lo?") == JOptionPane.YES_OPTION){
-                                    isEdit = true;
-                                    this.contato.setNome(nomeNovo);
-                                } else {
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // --- FIM DA VALIDAÇÃO ---
+        String status = "ativo";
 
-            // Lógica de gravação (Inserção ou Edição)
-            if (!isEdit) {
-                FileWriter fw = new FileWriter(arquivo, true);
-                fw.write(nomeNovo.concat(";").concat(email).concat(";").concat(telefone).concat(";").concat(status).concat(System.lineSeparator()));
-                fw.close();
-            } else {
-                java.util.List<String> linhas = Files.readAllLines(arquivo.toPath());
-                for (int i = 0; i < linhas.size(); i++) {
-                    if (linhas.get(i).startsWith(this.contato.getNome() + ";")) {
-                        linhas.set(i, nomeNovo.concat(";").concat(email).concat(";").concat(telefone).concat(";").concat(status));
-                        break;
+        // Executar I/O em background para não travar UI
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() {
+                try {
+                    if (!isEdit) {
+                        contatoController.create(dto);
+                    } else {
+                        contatoController.update(originalName, dto);
                     }
+                } catch (ValidationException | BusinessException ex) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Cadastro.this, ex.getMessage()));
+                } catch (Exception ex) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Cadastro.this, "Erro inesperado: " + ex.getMessage()));
                 }
-                Files.write(arquivo.toPath(), linhas);
+                return null;
             }
 
-            JOptionPane.showMessageDialog(this, "Operação realizada com sucesso!");
-            new Form_Listagem().setVisible(true);
-            this.dispose();
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao processar: " + e.getMessage());
-        }
+            @Override
+            protected void done() {
+                // voltar para listagem
+                Form_Listagem list = new Form_Listagem((com.br.senai.ads3.agenda_fatesg.controllers.ListController) contatoController);
+                list.setVisible(true);
+                dispose();
+            }
+        };
+        worker.execute();
     }//GEN-LAST:event_btnGravarActionPerformed
 
     private void btnFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFecharActionPerformed
@@ -318,17 +305,17 @@ public class Form_Cadastro extends javax.swing.JFrame {
 
     private void ajustaTela() {
         boolean habilita = true;
-        Color corTela = new Color(35,126,172);
-        Color corBotao = new Color(24,63,17);
-        if(this.tipoTela == TipoTela.VIEW){
-            corTela = new Color(206,118,25);
+        Color corTela = new Color(35, 126, 172);
+        Color corBotao = new Color(24, 63, 17);
+        if (this.tipoTela == TipoTela.VIEW) {
+            corTela = new Color(206, 118, 25);
             habilita = false;
-        } else if(this.tipoTela == TipoTela.EDIT){
-            corTela = new Color(82,0,30);
-            corBotao = new Color(215,63,17);            
+        } else if (this.tipoTela == TipoTela.EDIT) {
+            corTela = new Color(82, 0, 30);
+            corBotao = new Color(215, 63, 17);
         }
-        
-        if(habilita){
+
+        if (habilita) {
             this.edtTelefone.setForeground(Color.black);
             this.edtEmail.setForeground(Color.black);
             this.edtNome.setForeground(Color.black);
@@ -340,16 +327,16 @@ public class Form_Cadastro extends javax.swing.JFrame {
         this.pnDados.setBackground(corTela);
         this.btnGravar.setBackground(corBotao);
         this.btnGravar.setVisible(habilita);
-        this.edtTelefone.setEnabled(habilita);        
+        this.edtTelefone.setEnabled(habilita);
         this.edtEmail.setEnabled(habilita);
         this.edtNome.setEnabled(habilita);
-        
+
         this.revalidate();
         this.repaint();
     }
 
     private void carregaTela() {
-        if(this.contato == null){
+        if (this.contato == null) {
             this.contato = new Contato("", "", "");
         }
         this.edtNome.setText(this.contato.getNome());
