@@ -3,7 +3,7 @@
 Este diretório contém os detalhes da engenharia e design do sistema.
 
 ## 🗂 Organização
-* [**DAS.md**](./DAS.md): Documento de Arquitetura de Software.
+* [**DAS.md**](./docs/Agenda_Swing_DOCUMENTO_ARQUITETURA_DE_SOFTWARE_DAS01.pdf): Documento de Arquitetura de Software.
 * [**Diagramas/**](./diagramas/): Modelagem visual do sistema.
 
 ## 🏗️ Padrão Arquitetural
