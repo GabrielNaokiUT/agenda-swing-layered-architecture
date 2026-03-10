@@ -92,6 +92,16 @@ public class ContatoService implements IContatoService {
     public List<Contato> buscarTodos() throws Exception {
         return this.repository.buscarTodos();
     }
+    
+    @Override
+    public List<Contato> buscarTodosAtivos() throws Exception {
+        return this.repository.buscarTodos(true);
+    }
+    
+    @Override
+    public List<Contato> buscarTodosInativos() throws Exception {
+        return this.repository.buscarTodos(false);
+    }
 
     @Override
     public boolean contatoExiste(Contato contato) throws Exception {

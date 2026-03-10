@@ -17,6 +17,8 @@ public interface IContatoService{
     boolean excluir(final Contato contato) throws Exception;
     boolean excluir(final String nome) throws Exception;
     List<Contato> buscarTodos() throws Exception;
+    List<Contato> buscarTodosAtivos() throws Exception;
+    List<Contato> buscarTodosInativos() throws Exception;
     boolean contatoExiste(final Contato contato) throws Exception;
     boolean reativaContato(final Contato contato) throws Exception;
     Contato findByName(String name) throws Exception;

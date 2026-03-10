@@ -18,4 +18,5 @@ public interface IContatoRepository {
     boolean reativar(final Contato contato) throws Exception;
     boolean contatoExiste(final Contato contato) throws Exception;
     List<Contato> buscarTodos() throws Exception;
+    List<Contato> buscarTodos(boolean ativos) throws Exception;
 }

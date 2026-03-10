@@ -39,6 +39,14 @@ public class ContatoController implements FormController, ListController {
     public List<Contato> listAll() throws Exception  {
         return this.service.buscarTodos();
     }
+    @Override
+    public List<Contato> listAllActives() throws Exception  {
+        return this.service.buscarTodosAtivos();
+    }
+    @Override
+    public List<Contato> listAllInatives() throws Exception  {
+        return this.service.buscarTodosInativos();
+    }
 
     @Override
     public boolean markInactiveByName(String name) throws Exception {

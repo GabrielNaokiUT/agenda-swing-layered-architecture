@@ -41,29 +41,38 @@ public class ContatoRepository implements IContatoRepository {
     @Override
     public boolean alterar(Contato contato) {
         String linha = this.toCsvLine(contato, "ativo");
-        return alteraRegistro(linha);
+        String linhaAntiga = buscaRegistro(contato.getNome());
+        return alteraRegistro(linha, linhaAntiga);
     }
 
     @Override
     public boolean desativar(Contato contato) {
         String linha = this.toCsvLine(contato, "inativo");
-        return alteraRegistro(linha);
+        String linhaAntiga = buscaRegistro(contato.getNome());
+        return alteraRegistro(linha, linhaAntiga);
     }
 
     @Override
     public boolean reativar(Contato contato) {
         String linha = this.toCsvLine(contato, "ativo");
-        return alteraRegistro(linha);
+        String linhaAntiga = buscaRegistro(contato.getNome());
+        return alteraRegistro(linha, linhaAntiga);
     }
 
     @Override
     public boolean contatoExiste(Contato contato) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    	List<Contato> contatos = buscarTodos();
+		for (Contato c : contatos) {
+			if (c.getNome().equalsIgnoreCase(contato.getNome())) {
+				return true;
+			}
+		}
+		return false;
     }
 
     @Override
     public List<Contato> buscarTodos() {
-        List<String> linhas = linhasAtivas();
+        List<String> linhas = linhasAtivas(true, true);
         if (linhas == null || linhas.isEmpty()) {
             return List.of(); 
         }
@@ -71,7 +80,19 @@ public class ContatoRepository implements IContatoRepository {
                  .map(linha -> toObject(linha))
                  .toList();
 
-    }   
+    }
+    
+    @Override
+    public List<Contato> buscarTodos(boolean ativos) {
+        List<String> linhas = linhasAtivas(ativos, false);
+        if (linhas == null || linhas.isEmpty()) {
+            return List.of(); 
+        }
+        return linhas.stream()
+                 .map(linha -> toObject(linha))
+                 .toList();
+
+    } 
     
     // Manipulação do arquivo
 
@@ -107,19 +128,29 @@ public class ContatoRepository implements IContatoRepository {
         return false;
     }
     
-    private boolean alteraRegistro(final String registro) {
+    private boolean alteraRegistro(final String registro, String linhaAntiga) {
         try {
             ensureStorage();
             List<String> linhas = Files.readAllLines(storagePath, StandardCharsets.UTF_8);
-            Files.write(storagePath, linhas, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-            return true;
+            boolean alterou = false;
+            for (int i = 0; i < linhas.size(); i++) {
+                if (linhas.get(i).equals(linhaAntiga)) {
+                    linhas.set(i, registro);
+                    alterou = true;
+                    break; 
+                }
+            }
+            if (alterou) {
+               Files.write(storagePath, linhas, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+               return true;
+            }
         } catch (IOException ex) {
             System.getLogger(ContatoRepository.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);            
         }
         return false;
     }
     
-    private List<String> linhasAtivas(){
+    private List<String> linhasAtivas(boolean ativos, boolean todos){
         try {
             ensureStorage();
             List<String> lines = Files.readAllLines(storagePath, StandardCharsets.UTF_8);
@@ -127,13 +158,28 @@ public class ContatoRepository implements IContatoRepository {
             for (String l : lines) {
                 String[] d = l.split(";");
                 String status = d.length > 3 ? d[3] : "ativo";
-                if ("ativo".equalsIgnoreCase(status)) {                  
-                    result.add(l);
-                }
+                if (("ativo".equalsIgnoreCase(status) == ativos) || todos) {
+                	result.add(l);
+	             }				
             }
             return result;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }    
+    }
+
+    private String buscaRegistro(String nome) {
+        String result = "";
+        List<String> linhas = linhasAtivas(true, true);
+        if(linhas != null && !linhas.isEmpty()){
+            for (String ln : linhas) {
+                String vNome =ln.split(";")[0];
+                if(vNome.equalsIgnoreCase(nome)){
+                    result = ln;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

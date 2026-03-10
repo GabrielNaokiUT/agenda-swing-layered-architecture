@@ -20,7 +20,11 @@ import javax.swing.SwingWorker;
  */
 public class Form_Listagem extends javax.swing.JFrame {
 
-    private final ListController contatoController;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final ListController contatoController;
 
     /**
      * Creates new form Form_Listagem
@@ -358,7 +362,7 @@ public class Form_Listagem extends javax.swing.JFrame {
             @Override
             protected List<Contato> doInBackground() {
                 try {
-                    return contatoController.listAll();
+                    return contatoController.listAllActives();
                 } catch (Exception ex) {
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao carregar dados: " + ex.getMessage()));
                 }
