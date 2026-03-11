@@ -1,8 +1,6 @@
 package com.br.senai.ads3.agenda_fatesg.pages;
 
 import com.br.senai.ads3.agenda_fatesg.controllers.ContatoController;
-import com.br.senai.ads3.agenda_fatesg.controllers.FormController;
-import com.br.senai.ads3.agenda_fatesg.controllers.ListController;
 import com.br.senai.ads3.agenda_fatesg.domains.Contato;
 import com.br.senai.ads3.agenda_fatesg.enums.TipoTela;
 import java.awt.EventQueue;
@@ -15,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import com.br.senai.ads3.agenda_fatesg.controllers.IContatoListaController;
+import com.br.senai.ads3.agenda_fatesg.controllers.IContatoCadastroController;
 
 /**
  *
@@ -26,13 +26,13 @@ public class Form_Listagem extends javax.swing.JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private final ListController contatoController;
+	private final IContatoListaController contatoController;
 
     /**
      * Creates new form Form_Listagem
      * @param controller
      */
-    public Form_Listagem(ListController controller) {
+    public Form_Listagem(IContatoListaController controller) {
         this.contatoController = controller;
         initComponents();
         carregarDadosAsync();
@@ -241,7 +241,7 @@ public class Form_Listagem extends javax.swing.JFrame {
                 }
 
                 // Abre tela de cadastro em modo EDIT passando o controller
-                Form_Cadastro cadastro = new Form_Cadastro(TipoTela.EDIT, new Contato(nome, email, telefone), (com.br.senai.ads3.agenda_fatesg.controllers.FormController) contatoController);
+                Form_Cadastro cadastro = new Form_Cadastro(TipoTela.EDIT, new Contato(nome, email, telefone), (com.br.senai.ads3.agenda_fatesg.controllers.IContatoCadastroController) contatoController);
                 cadastro.setVisible(true);
                 this.dispose();
             }
@@ -249,7 +249,7 @@ public class Form_Listagem extends javax.swing.JFrame {
     }//GEN-LAST:event_gridMouseClicked
 
     private void btnAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarActionPerformed
-        Form_Cadastro cadastro = new Form_Cadastro((FormController) contatoController);
+        Form_Cadastro cadastro = new Form_Cadastro((IContatoCadastroController) contatoController);
         cadastro.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnAdicionarActionPerformed
@@ -287,7 +287,7 @@ public class Form_Listagem extends javax.swing.JFrame {
             @Override
             protected Boolean doInBackground() {
                 try {
-                    return contatoController.markInactiveByName(nome);
+                    return contatoController.inativarPorNome(nome);
                 } catch (Exception ex) {
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao excluir: " + ex.getMessage()));
                     return false;
@@ -363,7 +363,7 @@ public class Form_Listagem extends javax.swing.JFrame {
             @Override
             protected List<Contato> doInBackground() {
                 try {
-                    return contatoController.listAllActives();
+                    return contatoController.listarTodosAtivos();
                 } catch (Exception ex) {
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao carregar dados: " + ex.getMessage()));
                 }

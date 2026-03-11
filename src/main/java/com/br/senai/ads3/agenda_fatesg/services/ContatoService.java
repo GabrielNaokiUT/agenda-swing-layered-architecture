@@ -58,7 +58,7 @@ public class ContatoService implements IContatoService {
     
     @Override
     public boolean excluir(String nome) throws Exception {
-        Contato contato = this.findByName(nome);
+        Contato contato = this.buscarPorNome(nome);
         if(contato != null){
             return excluir(contato);
         }
@@ -66,7 +66,7 @@ public class ContatoService implements IContatoService {
     }
     
     @Override
-    public List<Contato> searchName(String name) throws Exception {
+    public List<Contato> listarPorNome(String name) throws Exception {
         List<Contato> all = this.buscarTodos();
         List<Contato> filtered = new ArrayList<>();
         for (Contato c : all) {
@@ -78,7 +78,7 @@ public class ContatoService implements IContatoService {
     }
     
     @Override
-    public Contato findByName(String name) throws Exception {
+    public Contato buscarPorNome(String name) throws Exception {
         List<Contato> all = this.buscarTodos();
         for (Contato c : all) {
             if (c.getNome() != null && c.getNome().toLowerCase().contains(name.toLowerCase())) {

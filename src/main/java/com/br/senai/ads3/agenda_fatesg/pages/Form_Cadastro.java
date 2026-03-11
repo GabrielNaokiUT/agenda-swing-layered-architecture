@@ -1,7 +1,6 @@
 package com.br.senai.ads3.agenda_fatesg.pages;
 
 import com.br.senai.ads3.agenda_fatesg.controllers.ContatoController;
-import com.br.senai.ads3.agenda_fatesg.controllers.FormController;
 import com.br.senai.ads3.agenda_fatesg.domains.Contato;
 import com.br.senai.ads3.agenda_fatesg.enums.TipoTela;
 import com.br.senai.ads3.agenda_fatesg.exceptions.BusinessException;
@@ -10,6 +9,7 @@ import java.awt.Color;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import com.br.senai.ads3.agenda_fatesg.controllers.IContatoCadastroController;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -28,9 +28,9 @@ public class Form_Cadastro extends javax.swing.JFrame {
      */
     final private TipoTela tipoTela;
     private Contato contato;
-    private final FormController contatoController;
+    private final IContatoCadastroController contatoController;
 
-    public Form_Cadastro(final TipoTela tipoTela, final Contato contato, final FormController controller) {
+    public Form_Cadastro(final TipoTela tipoTela, final Contato contato, final IContatoCadastroController controller) {
         this.tipoTela = tipoTela;
         if (contato == null) {
             this.contato = new Contato("", "", "");
@@ -43,7 +43,7 @@ public class Form_Cadastro extends javax.swing.JFrame {
         carregaTela();
     }
 
-    public Form_Cadastro(FormController controller) {
+    public Form_Cadastro(IContatoCadastroController controller) {
         this(TipoTela.INSERT, null, controller);
     }
 
@@ -220,9 +220,9 @@ public class Form_Cadastro extends javax.swing.JFrame {
             protected Void doInBackground() {
                 try {
                     if (!isEdit) {
-                        contatoController.create(dto);
+                        contatoController.criar(dto);
                     } else {
-                        contatoController.update(originalName, dto);
+                        contatoController.alterar(originalName, dto);
                     }
                 } catch (ValidationException | BusinessException ex) {
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Cadastro.this, ex.getMessage()));
@@ -235,7 +235,7 @@ public class Form_Cadastro extends javax.swing.JFrame {
             @Override
             protected void done() {
                 // voltar para listagem
-                Form_Listagem list = new Form_Listagem((com.br.senai.ads3.agenda_fatesg.controllers.ListController) contatoController);
+                Form_Listagem list = new Form_Listagem((com.br.senai.ads3.agenda_fatesg.controllers.IContatoListaController) contatoController);
                 list.setVisible(true);
                 dispose();
             }

@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContatoController implements FormController, ListController {
+public class ContatoController implements IContatoCadastroController, IContatoListaController {
     
     private final IContatoService service;
 
@@ -20,7 +20,7 @@ public class ContatoController implements FormController, ListController {
     }
     
     @Override
-    public Contato create(Contato dto) throws Exception {
+    public Contato criar(Contato dto) throws Exception {
         if(this.service.inserir(dto)){
             return dto;
         }
@@ -28,7 +28,7 @@ public class ContatoController implements FormController, ListController {
     }
 
     @Override
-    public Contato update(String originalName, Contato dto) throws Exception {
+    public Contato alterar(String originalName, Contato dto) throws Exception {
         if(this.service.alterar(dto)){
             return dto;
         }
@@ -36,26 +36,26 @@ public class ContatoController implements FormController, ListController {
     }
 
     @Override
-    public List<Contato> listAll() throws Exception  {
+    public List<Contato> listarTodos() throws Exception  {
         return this.service.buscarTodos();
     }
     @Override
-    public List<Contato> listAllActives() throws Exception  {
+    public List<Contato> listarTodosAtivos() throws Exception  {
         return this.service.buscarTodosAtivos();
     }
     @Override
-    public List<Contato> listAllInatives() throws Exception  {
+    public List<Contato> listaTodosInativos() throws Exception  {
         return this.service.buscarTodosInativos();
     }
 
     @Override
-    public boolean markInactiveByName(String name) throws Exception {
+    public boolean inativarPorNome(String name) throws Exception {
         return this.service.excluir(name);
     }
 
     @Override
-    public List<Contato> searchName(String name) throws Exception {
-        List<Contato> all = listAll();
+    public List<Contato> buscarPorNome(String name) throws Exception {
+        List<Contato> all = listarTodos();
         List<Contato> filtered = new ArrayList<>();
         for (Contato c : all) {
             if (c.getNome() != null && c.getNome().toLowerCase().contains(name.toLowerCase())) {

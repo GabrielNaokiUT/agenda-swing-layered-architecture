@@ -21,6 +21,6 @@ public interface IContatoService{
     List<Contato> buscarTodosInativos() throws Exception;
     boolean contatoExiste(final Contato contato) throws Exception;
     boolean reativaContato(final Contato contato) throws Exception;
-    Contato findByName(String name) throws Exception;
-    List<Contato> searchName(String name) throws Exception;
+    Contato buscarPorNome(String name) throws Exception;
+    List<Contato> listarPorNome(String name) throws Exception;
 }
