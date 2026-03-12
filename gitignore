@@ -1,0 +1,81 @@
+# ============================================================
+#  .gitignore — agenda-swing-layered-architecture
+# ============================================================
+
+# ──────────────────────────────────────────
+# Java / Maven build outputs
+# ──────────────────────────────────────────
+target/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# ──────────────────────────────────────────
+# Maven
+# ──────────────────────────────────────────
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ──────────────────────────────────────────
+# SQLite database (gerado em runtime)
+# ──────────────────────────────────────────
+database/*.db
+database/*.sqlite
+*.db
+*.sqlite
+
+# ──────────────────────────────────────────
+# IDEs — IntelliJ IDEA
+# ──────────────────────────────────────────
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ──────────────────────────────────────────
+# IDEs — Eclipse
+# ──────────────────────────────────────────
+.classpath
+.project
+.settings/
+.factorypath
+
+# ──────────────────────────────────────────
+# IDEs — NetBeans
+# ──────────────────────────────────────────
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ──────────────────────────────────────────
+# IDEs — VS Code
+# ──────────────────────────────────────────
+.vscode/
+*.code-workspace
+
+# ──────────────────────────────────────────
+# Sistema Operacional
+# ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ──────────────────────────────────────────
+# Arquivos temporários / lixo
+# ──────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+*.swp
+agenda.txt
+classpath.txt
+factorypath.txt
+project.txt
+gitignore.txt
