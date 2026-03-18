@@ -10,6 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import com.br.senai.ads3.agenda_fatesg.controllers.IContatoCadastroController;
+import com.br.senai.ads3.agenda_fatesg.dtos.Response;
+import com.br.senai.ads3.agenda_fatesg.enums.StatusResponse;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -217,19 +219,17 @@ public class Form_Cadastro extends javax.swing.JFrame {
         // Executar I/O em background para não travar UI
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
-            protected Void doInBackground() {
-                try {
-                    if (!isEdit) {
-                        contatoController.criar(dto);
-                    } else {
-                        contatoController.alterar(originalName, dto);
-                    }
-                } catch (ValidationException | BusinessException ex) {
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Cadastro.this, ex.getMessage()));
-                } catch (Exception ex) {
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Cadastro.this, "Erro inesperado: " + ex.getMessage()));
+            protected Void doInBackground() {                
+                Response response;
+                if (!isEdit) {
+                    response = contatoController.criar(dto);
+                } else {
+                    response = contatoController.alterar(originalName, dto);
                 }
-                return null;
+                if(response.getStatus().equals(StatusResponse.ERRO)) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Cadastro.this, response.getMensagemErro()));
+                }
+                return null;                
             }
 
             @Override

@@ -15,6 +15,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import com.br.senai.ads3.agenda_fatesg.controllers.IContatoListaController;
 import com.br.senai.ads3.agenda_fatesg.controllers.IContatoCadastroController;
+import com.br.senai.ads3.agenda_fatesg.dtos.Response;
+import com.br.senai.ads3.agenda_fatesg.enums.StatusResponse;
 
 /**
  *
@@ -283,21 +285,22 @@ public class Form_Listagem extends javax.swing.JFrame {
             return;
         }
 
-        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+        SwingWorker<Response, Void> worker = new SwingWorker<>() {
             @Override
-            protected Boolean doInBackground() {
-                try {
-                    return contatoController.inativarPorNome(nome);
-                } catch (Exception ex) {
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, "Erro ao excluir: " + ex.getMessage()));
-                    return false;
+            protected Response doInBackground() {
+                Response response = contatoController.inativarPorNome(nome);
+                if(response.getStatus().equals(StatusResponse.ERRO)) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Form_Listagem.this, response.getTitulo().concat(": ").concat(response.getMensagemErro())));
+                    return null;
+                } else {
+                    return response;
                 }
             }
 
             @Override
             protected void done() {
                 try {
-                    Boolean ok = get();
+                    Response response = get();
                     if (ok) {
                         JOptionPane.showMessageDialog(Form_Listagem.this, "Contato marcado como inativo.");
                         carregarDadosAsync(); // recarrega tabela
